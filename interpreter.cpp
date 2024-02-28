@@ -36,6 +36,7 @@ bool parse(const std::string& program) {
 
 bool run() {
     std::stack<unsigned long long> circles;
+    std::stack<unsigned long long> skiped;
     bool crcflg = true;
     for (auto command = 0ull; command < commands.size();) {
         if (crcflg && commands[command] == '>') {
@@ -64,21 +65,29 @@ bool run() {
             }
             --line[i];
         } else if (crcflg && commands[command] == '.') {
-            putchar(line[i]);
+                putchar(line[i]);
         } else if (crcflg && commands[command] == ',') {
             line[i] = static_cast<char>(getchar());
         } else if (commands[command] == '[') {
             circles.push(command);
-            if (line[i] == 0) {
+            if (line[i] == 0 || !crcflg) {
+                skiped.push(command);
                 crcflg = false;
             }
         } else if (commands[command] == ']') {
             if (circles.empty()) {
                 std::cerr
-                << "You are fucking idiot! You forgot start the circle...";
+                << "You are fucking idiot! You forgor start the circle...";
                 return false;
             }
-            if (line[i] != 0) {
+            if (!skiped.empty() && skiped.top() == circles.top()) {
+                skiped.pop();
+                circles.pop();
+
+                if (skiped.empty()) {
+                    crcflg = true;
+                }
+            }else if (line[i] != 0) {
                 command = circles.top();
             } else {
                 circles.pop();
